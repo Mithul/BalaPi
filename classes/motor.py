@@ -1,10 +1,6 @@
 import RPi.GPIO as GPIO
 import time
 
-
-
-
-
 class Motor:
 
 	def __init__(self, pin1, pin2):
@@ -19,12 +15,10 @@ class Motor:
 	def forward(self,speed,s):
 		self.driverR.stop()
 		self.driverF.start(speed)
-		time.sleep(s)
 
 	def reverse(self,speed,s):
 		self.driverF.stop()
 		self.driverR.start(speed)
-		time.sleep(s)
 	
 	def move(self,speed,s):
 		if(speed>0):
@@ -38,9 +32,5 @@ class Motor:
 		GPIO.cleanup()	
 
 
-GPIO.cleanup()
-m = Motor(11,13)
-m.move(50,1)
-m.move(-50,1)
 
 
