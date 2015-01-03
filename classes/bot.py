@@ -13,21 +13,15 @@ class Bot:
 		self.motorR.move(speed,s)
 		time.sleep(s)
 
+	def turn(self,speed,s):
+		if speed>0:
+			self.motorL.move(100-speed,s)
+                	self.motorR.move(speed,s)
+		else:
+			self.motorL.move(100+speed,s)
+                	self.motorR.move(speed,s)
 
-GPIO.cleanup()
-time.sleep(5)
-m1 = Motor(11,15)
-m2 = Motor(13,12)
+                time.sleep(s)
 
-b= Bot(m1,m2)
 
-speed=100
-
-while speed>=-100:
-	if(speed>-20 and speed<20):
-		b.move(-100,0.5)
-		speed = -20
-	b.move(speed,1)
-	print speed
-	speed=speed-20
 
