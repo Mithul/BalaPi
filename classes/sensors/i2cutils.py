@@ -8,6 +8,7 @@ def i2c_raspberry_pi_bus_number():
     the original version (with 256MB or RAM) using `/dev/i2c-0`.
     """
     cpuinfo = 1
+    #Manually returning
     return 1
     with open('/proc/cpuinfo','r') as f:
         for line in f:
