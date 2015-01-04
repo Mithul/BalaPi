@@ -24,6 +24,9 @@ class _Getch:
                 termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
             return ch
 
+speed =100
+t = 0.01
+
 def get():
         inkey = _Getch()
         while(1):
@@ -31,21 +34,21 @@ def get():
                 if k!='':break
         if k=='\x1b[A':
                 print "up"
-		bot.move(100,0.5)
+		bot.move(speed,t)
         elif k=='\x1b[B':
                 print "down"
-		bot.move(-100,0.5)
+		bot.move(-speed,t)
         elif k=='\x1b[C':
                 print "right"
-		bot.turn(100,0.5)
+		bot.turn(-speed,t)
         elif k=='\x1b[D':
                 print "left"
-		bot.turn(-100,0.5)
+		bot.turn(speed,t)
         else:
-                print "not an arrow key!"
+                print "not an arrow key! Exiting"
 		exit()
 def main():
-        for i in range(0,20):
+    while(True):
                 get()
 
 if __name__=='__main__':
