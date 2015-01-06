@@ -10,11 +10,12 @@ from sensors.i2cutils import i2c_raspberry_pi_bus_number
 
 class Bot:
 
-    def __init__(self, m1, m2, imu=None):
+    def __init__(self, m1, m2, imu=None,queue=None):
         self.motorL = m1
         self.motorR = m2
         self.imu = imu
         self.speed = 0
+        self.queue=queue
 
     def move(self,speed,s):
         if speed == self.speed:
@@ -76,8 +77,14 @@ class Bot:
             time.sleep(0.1)
             print 'y ', orientation[6],' speed ',speed
 
+    def getPIDvalues(self):
+       try:
+           return self.queue.get_nowait()
+       except Exception, e:
+           return None
+
     def balance2(self):
-        KI=1
+        KI=0
         KD=0
         KP=1
         iTerm=0
@@ -87,22 +94,30 @@ class Bot:
         CFangleY=0
         DT=0.02
         while True:
+            PID = self.getPIDvalues()
+            if PID is not None:
+                KP=float(PID[0])
+                KI=float(PID[1])
+                KD=float(PID[2])
             orientation = self.imu.read_all()
             gyroYangle+=orientation[3]*DT;
             accelAngle = orientation[6]*90
             AA=0.98
             CFangleY=AA*(CFangleY + gyroYangle) +(1 - AA) * accelAngle;
             Pterm = KP * CFangleY
-            iTerm += KI * CFangleY
+            iTerm += KI * CFangleY*DT
             dTerm = KD *  (CFangleY -  lastAngle)
             lastAngle = CFangleY
             print 'PID',Pterm,iTerm,dTerm
             output = Pterm + iTerm + dTerm
+            if output==0:
+                output=1
             speed = 0 + abs(output)*100/90
             adaptive_speed = abs(output)*speed/output
             if output==0:
                 output=1
             self.move(adaptive_speed,0)
+            print 'PID ',KP,KI,KD
             print 'Angle',gyroYangle,accelAngle,CFangleY,output,'   ',speed,adaptive_speed
             while (time.time()-last_time<DT):
                 time.sleep(0.001)
