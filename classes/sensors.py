@@ -22,24 +22,17 @@ if __name__ == "__main__":
 
         #time.sleep(0.5)
         orientation = imu_controller.read_all()
-        print 'pitch ', orientation[0]
-        print 'roll ', orientation[1]
         print 'gyro_scaled_x ', orientation[2]
         print 'gyro_scaled_y ', orientation[3]
         print 'gyro_scaled_z ', orientation[4]
-        print 'accel_scaled_x ', orientation[5]
-        print 'accel_scaled_y ', orientation[6]
-        print 'accel_scaled_z ',orientation[7]
         print 'raw gyro y ',orientation[8]
         print ''
         gyroYangle+=orientation[3]*DT;
         accelAngle = orientation[6]*90
         AA=0.98
         CFangleX=AA*(CFangleX + gyroYangle) +(1 - AA) * accelAngle;
-        print 'Angle',gyroYangle,accelAngle,CFangleX
         while (time.time()-last_time<DT):
             time.sleep(0.001)
-        print time.time(),last_time,time.time()-last_time
         last_time=time.time()
         print ''
         #exit()

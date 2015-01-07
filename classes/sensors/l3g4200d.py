@@ -44,11 +44,11 @@ class L3G4200D(object):
         self.fs_scale = fs_scale
 
         self.gyro_raw_x = 0
-        self.gyro_raw_y = 0
+        self.gyro_raw_y = 0.0
         self.gyro_raw_z = 0
 
         self.gyro_scaled_x = 0
-        self.gyro_scaled_y = 0
+        self.gyro_scaled_y = 0.0
         self.gyro_scaled_z = 0
 
         self.raw_temp = 0
@@ -71,7 +71,6 @@ class L3G4200D(object):
         self.gyro_scaled_x = math.radians(self.gyro_raw_x * L3G4200D.GYRO_SCALE[self.fs_scale][0])
         self.gyro_scaled_y = math.radians(self.gyro_raw_y * L3G4200D.GYRO_SCALE[self.fs_scale][0])
         self.gyro_scaled_z = math.radians(self.gyro_raw_z * L3G4200D.GYRO_SCALE[self.fs_scale][0])
-
     def read_raw_gyro_x(self):
         '''Return the RAW X gyro value'''
         return self.gyro_raw_x

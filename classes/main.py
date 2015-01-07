@@ -29,9 +29,12 @@ p = multiprocessing.Process(target=worker, args=(refbot,))
 p.start()
 inkey = _Getch()
 i=0
-PID = [0.0,0.0,0.0]
+PID = [0.3,0.0,0.0]
+queue.put(PID)
 while True:
     PID[0]=raw_input()
+    PID[1]=raw_input()
+    PID[2]=raw_input()
     queue.put(PID)
     # Wait for the
     # worker to finish

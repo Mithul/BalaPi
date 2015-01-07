@@ -27,6 +27,7 @@ class Motor:
         self.driverR.start(speed)
 
     def move(self,speed,s):
+        speed=speed
         if(speed>0):
             self.forward(speed,s)
         else:

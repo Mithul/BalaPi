@@ -18,26 +18,8 @@ class Bot:
         self.queue=queue
 
     def move(self,speed,s):
-        if speed == self.speed:
-            return
-        if s==0:
             self.motorL.move(speed,s)
             self.motorR.move(speed,s)
-            return
-        time_inc = s/math.fabs(speed - self.speed)
-        if time_inc<0.01:
-            time_inc=0.001
-        elif time_inc>1:
-            time_inc=0.001
-        while (speed > 0 and self.speed < speed) or (speed < 0 and self.speed > speed):
-            if speed > 0 and self.speed < speed:
-                self.speed=self.speed+5
-            elif speed < 0 and self.speed > speed:
-                self.speed=self.speed-5
-            self.motorL.move(self.speed,s)
-            self.motorR.move(self.speed,s)
-            print self.speed,time_inc
-            time.sleep(time_inc)
 
     def turn(self,speed,s):
         self.speed=0
@@ -102,21 +84,25 @@ class Bot:
             orientation = self.imu.read_all()
             gyroYangle+=orientation[3]*DT;
             accelAngle = orientation[6]*90
-            AA=0.98
+            AA=0.9
             CFangleY=AA*(CFangleY + gyroYangle) +(1 - AA) * accelAngle;
             Pterm = KP * CFangleY
             iTerm += KI * CFangleY*DT
             dTerm = KD *  (CFangleY -  lastAngle)
             lastAngle = CFangleY
+            if iTerm>100:
+                iTerm = 100
+            elif iTerm<-100:
+                iTerm = -100
             print 'PID',Pterm,iTerm,dTerm
             output = Pterm + iTerm + dTerm
             if output==0:
                 output=1
-            speed = 0 + abs(output)*100/90
+            speed = 10 + abs(output)*90/90
             adaptive_speed = abs(output)*speed/output
             if output==0:
                 output=1
-            self.move(adaptive_speed,0)
+            self.move(adaptive_speed,0.01)
             print 'PID ',KP,KI,KD
             print 'Angle',gyroYangle,accelAngle,CFangleY,output,'   ',speed,adaptive_speed
             while (time.time()-last_time<DT):
