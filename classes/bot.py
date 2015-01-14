@@ -16,6 +16,7 @@ class Bot:
         self.imu = imu
         self.speed = 0
         self.queue=queue
+        self.offsetAngle = 0
 
     def move(self,speed,s):
             self.motorL.move(speed,s)
@@ -75,36 +76,52 @@ class Bot:
         gyroYangle=0
         CFangleY=0
         DT=0.02
+        f = open('point.txt', 'w')
+        f1 = open('point1.txt', 'w')
+        print f
+        i=0
         while True:
+            i=i+1
             PID = self.getPIDvalues()
             if PID is not None:
-                KP=float(PID[0])
-                KI=float(PID[1])
-                KD=float(PID[2])
+                if PID['PID'] is not None:
+                    PID=PID['PID']
+                    KP=float(PID[0])
+                    KI= float(PID[1])
+                    KD=float(PID[2])
+                elif PID['gyro'] is not None:
+                    self.offsetAngle=CFangleY - self.offsetAngle
+                    iTerm=0
             orientation = self.imu.read_all()
-            gyroYangle+=orientation[3]*DT;
+            gyroYangle+=(orientation[8]+18)*DT/5
             accelAngle = orientation[6]*90
             AA=0.9
             CFangleY=AA*(CFangleY + gyroYangle) +(1 - AA) * accelAngle;
+            CFangleY=self.imu.read_pitch_roll_yaw()[0]*180/3.14 - self.offsetAngle
+            Pterm = KP * 110*(1-1.05**(-abs(CFangleY)))*abs(CFangleY)/CFangleY
             Pterm = KP * CFangleY
             iTerm += KI * CFangleY*DT
             dTerm = KD *  (CFangleY -  lastAngle)
             lastAngle = CFangleY
-            if iTerm>100:
-                iTerm = 100
-            elif iTerm<-100:
-                iTerm = -100
+            #if iTerm>200:
+            #    iTerm = 200
+            #elif iTerm<-200:
+            #    iTerm = -200
             print 'PID',Pterm,iTerm,dTerm
             output = Pterm + iTerm + dTerm
             if output==0:
                 output=1
-            speed = 10 + abs(output)*90/90
+            speed = 0 + abs(output)*100/90
+            if speed>100:
+                speed=99.9
             adaptive_speed = abs(output)*speed/output
             if output==0:
                 output=1
             self.move(adaptive_speed,0.01)
             print 'PID ',KP,KI,KD
             print 'Angle',gyroYangle,accelAngle,CFangleY,output,'   ',speed,adaptive_speed
+            f.write(str(i)+'\t'+str(CFangleY)+'\t'+str(gyroYangle)+'\t'+str(accelAngle)+'\n')
+            f1.write(str(i)+'\t'+str(Pterm)+'\t'+str(iTerm)+'\t'+str(dTerm)+'\t'+str(output)+'\t'+str(adaptive_speed)+'\n')
             while (time.time()-last_time<DT):
                 time.sleep(0.001)
             print time.time(),last_time,time.time()-last_time

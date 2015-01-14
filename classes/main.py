@@ -29,12 +29,20 @@ p = multiprocessing.Process(target=worker, args=(refbot,))
 p.start()
 inkey = _Getch()
 i=0
-PID = [0.3,0.0,0.0]
+PID = {'PID':[1.0,0.0,0.0],'gyro':False}
 queue.put(PID)
 while True:
-    PID[0]=raw_input()
-    PID[1]=raw_input()
-    PID[2]=raw_input()
+    PID = {'PID':[1.0,0.0,0.0],'gyro':False}
+    PID['PID'][0]=raw_input()
+    if PID['PID'][0]=='':
+        PID['PID']=None
+        PID['gyro']=True
+        queue.put(PID)
+        continue
+    PID['PID'][1]=raw_input()
+    PID['PID'][2]=raw_input()
+    PID['gyro']=None
+    print 'Change',PID
     queue.put(PID)
     # Wait for the
     # worker to finish

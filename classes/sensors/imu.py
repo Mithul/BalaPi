@@ -54,7 +54,7 @@ class IMU(object):
         (self.pitch, self.roll) = self.comp_filter(self.rotation_x, self.rotation_y)
 
         # return (self.pitch, self.roll, self.gyro_scaled_x, self.gyro_scaled_y, self.gyro_scaled_z, self.accel_scaled_x, self.accel_scaled_y, self.accel_scaled_z)
-        return (self.pitch, self.roll, self.gyro_scaled_x, self.gyro_scaled_y, self.gyro_scaled_z, self.accel_scaled_x, self.accel_scaled_y, self.accel_scaled_z, self.accelerometer.read_raw_accel_y())
+        return (self.pitch, self.roll, self.gyro_scaled_x, self.gyro_scaled_y, self.gyro_scaled_z, self.accel_scaled_x, self.accel_scaled_y, self.accel_scaled_z, self.gyroscope.read_raw_gyro_y())
 
     def read_x_rotation(self, x, y, z):
         return self.rotation_x
@@ -74,7 +74,7 @@ class IMU(object):
         '''
         (raw_pitch, raw_roll, self.gyro_scaled_x, self.gyro_scaled_y, \
             self.gyro_scaled_z, self.accel_scaled_x, self.accel_scaled_y, \
-            self.accel_scaled_z) = self.read_all()
+            self.accel_scaled_z,s) = self.read_all()
 
         now = time.time()
         self.time_diff = now - self.last_time
