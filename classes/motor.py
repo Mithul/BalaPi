@@ -28,8 +28,8 @@ class Motor:
 
     def move(self,speed,s):
         speed=speed
-        if abs(speed)<5:
-            speed=0
+        #if abs(speed)<5:
+        #    speed=0
         if(speed>0):
             self.forward(speed,s)
         else:

@@ -90,7 +90,7 @@ class Bot:
                     KI= float(PID[1])
                     KD=float(PID[2])
                 elif PID['gyro'] is not None:
-                    self.offsetAngle=CFangleY - self.offsetAngle
+                    self.offsetAngle=CFangleY + self.offsetAngle
                     iTerm=0
             orientation = self.imu.read_all()
             gyroYangle+=(orientation[8]+18)*DT/5
@@ -103,10 +103,10 @@ class Bot:
             iTerm += KI * CFangleY*DT
             dTerm = KD *  (CFangleY -  lastAngle)
             lastAngle = CFangleY
-            #if iTerm>200:
-            #    iTerm = 200
-            #elif iTerm<-200:
-            #    iTerm = -200
+            if iTerm>500:
+                iTerm = 500
+            elif iTerm<-500:
+                iTerm = -500
             print 'PID',Pterm,iTerm,dTerm
             output = Pterm + iTerm + dTerm
             if output==0:

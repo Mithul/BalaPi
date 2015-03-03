@@ -10,13 +10,17 @@ from key import _Getch
 
 
 def worker(bot):
-    bot[0].balance2()
+    try:
+        bot[0].balance2()
+    except IOError, e:
+        m1.move(0,0)
+        m2.move(0,0)
 
 queue = multiprocessing.Queue()
 GPIO.cleanup()
 time.sleep(1)
-m1 = Motor(12,11)
-m2 = Motor(13,15)
+m1 = Motor(11,12)
+m2 = Motor(15,13)
 bus = smbus.SMBus(i2c_raspberry_pi_bus_number())
 imu = imuc.IMU(bus, 0x69, 0x53, 0x1e, "IMU")
 bot= Bot(m1,m2,imu,queue)
