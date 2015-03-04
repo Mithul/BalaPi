@@ -17,6 +17,8 @@ class Bot:
         self.speed = 0
         self.queue=queue
         self.offsetAngle = 0
+        GPIO.setup(18,GPIO.IN)
+        GPIO.setup(16,GPIO.IN)
 
     def move(self,speed,s):
             self.motorL.move(speed,s)
@@ -66,6 +68,9 @@ class Bot:
        except Exception, e:
            return None
 
+    def detectObstacle(self):
+        return {'front':GPIO.input(16),'back':GPIO.input(18)}
+
     def balance2(self):
         KI=0
         KD=0
@@ -96,9 +101,16 @@ class Bot:
             gyroYangle+=(orientation[8]+18)*DT/5
             accelAngle = orientation[6]*90
             AA=0.9
-            CFangleY=AA*(CFangleY + gyroYangle) +(1 - AA) * accelAngle;
+            #CFangleY=AA*(CFangleY + gyroYangle) +(1 - AA) * accelAngle;
             CFangleY=self.imu.read_pitch_roll_yaw()[0]*180/3.14 - self.offsetAngle
-            Pterm = KP * 110*(1-1.05**(-abs(CFangleY)))*abs(CFangleY)/CFangleY
+            #Pterm = KP * 110*(1-1.05**(-abs(CFangleY)))*abs(CFangleY)/CFangleY
+            obstacle = self.detectObstacle()
+            if obstacle['front']:
+                oTerm=oTerm+1
+            if obstacle['back']==1:
+                oTerm=oTerm-1
+            if obstacle['front']==0 and obstacle['back']==0:
+                oTerm=0
             Pterm = KP * CFangleY
             iTerm += KI * CFangleY*DT
             dTerm = KD *  (CFangleY -  lastAngle)
@@ -108,15 +120,13 @@ class Bot:
             elif iTerm<-500:
                 iTerm = -500
             print 'PID',Pterm,iTerm,dTerm
-            output = Pterm + iTerm + dTerm
-            if output==0:
-                output=1
+            output = Pterm + iTerm + dTerm + oTerm
             speed = 0 + abs(output)*100/90
             if speed>100:
                 speed=99.9
-            adaptive_speed = abs(output)*speed/output
             if output==0:
                 output=1
+            adaptive_speed = abs(output)*speed/output
             self.move(adaptive_speed,0.01)
             print 'PID ',KP,KI,KD
             print 'Angle',gyroYangle,accelAngle,CFangleY,output,'   ',speed,adaptive_speed

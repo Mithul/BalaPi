@@ -12,7 +12,7 @@ from key import _Getch
 def worker(bot):
     try:
         bot[0].balance2()
-    except IOError, e:
+    except Exception, e:
         m1.move(0,0)
         m2.move(0,0)
 

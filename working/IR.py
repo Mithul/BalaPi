@@ -4,9 +4,9 @@ import time
 
 print 'starting'
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(11,GPIO.IN)
-GPIO.setup(13,GPIO.IN)
+GPIO.setup(18,GPIO.IN)
+GPIO.setup(16,GPIO.IN)
 
 while True:
-	print GPIO.input(11),GPIO.input(13)
+	print GPIO.input(16),GPIO.input(18)
 	time.sleep(0.5)
