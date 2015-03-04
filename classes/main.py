@@ -13,6 +13,7 @@ def worker(bot):
     try:
         bot[0].balance2()
     except Exception, e:
+        print e
         m1.move(0,0)
         m2.move(0,0)
 

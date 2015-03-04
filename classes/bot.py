@@ -16,7 +16,7 @@ class Bot:
         self.imu = imu
         self.speed = 0
         self.queue=queue
-        self.offsetAngle = 0
+        self.offsetAngle = -0.291596818363
         # Initialize input pins for the IR sensors
         GPIO.setup(18,GPIO.IN)
         GPIO.setup(16,GPIO.IN)
@@ -85,14 +85,17 @@ class Bot:
         KD=0
         KP=1
         iTerm=0
+        oTerm=0
         lastAngle=0
         last_time=time.time()
         gyroYangle=0
         CFangleY=0
         DT=0.02
+        count=0
         #Open files for saving measured data for analysis
         f = open('point.txt', 'w')
         f1 = open('point1.txt', 'w')
+        f2 = open('zero.txt', 'a')
         i=0
         while True:
             i=i+1
@@ -107,9 +110,20 @@ class Bot:
                 elif PID['gyro'] is not None:
                     self.offsetAngle=CFangleY + self.offsetAngle
                     iTerm=0
-            #orientation = self.imu.read_all()
-            #gyroYangle+=(orientation[8]+18)*DT/5
-            #accelAngle = orientation[6]*90
+                    f2.write(str(self.offsetAngle)+'\n')
+            if abs(CFangleY)>3:
+                if CFangleY>0:
+                    count=count+1
+                else:
+                    count=count-1
+            if abs(count)>100 and False:
+                if count>0:
+                    self.offsetAngle=self.offsetAngle-0.05
+                else:
+                    self.offsetAngle=self.offsetAngle+0.05
+            orientation = self.imu.read_all()
+            gyroYangle+=(orientation[8]+18)*DT/5
+            accelAngle = orientation[6]*90
             #AA=0.9
             #CFangleY=AA*(CFangleY + gyroYangle) +(1 - AA) * accelAngle;
             #Read the angle from the IMU
@@ -117,6 +131,7 @@ class Bot:
             #Pterm = KP * 110*(1-1.05**(-abs(CFangleY)))*abs(CFangleY)/CFangleY
             #Detect obstacles and accordingle add an offset to the speed
             obstacle = self.detectObstacle()
+            obstacle={'front':0,'back':0}
             if obstacle['front']:
                 oTerm=oTerm+1
             if obstacle['back']==1:
@@ -132,6 +147,8 @@ class Bot:
                 iTerm = 500
             elif iTerm<-500:
                 iTerm = -500
+            if iTerm*CFangleY<0 and False:
+                iTerm=0
             print 'PID',Pterm,iTerm,dTerm
             output = Pterm + iTerm + dTerm + oTerm
             speed = 0 + abs(output)*100/90
