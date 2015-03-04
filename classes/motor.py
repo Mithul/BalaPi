@@ -4,6 +4,7 @@ import time
 class Motor:
 
     def __init__(self, pin1, pin2):
+        '''Initialize all pins'''
         self.pin1 = pin1
         self.pin2 = pin2
         GPIO.setmode(GPIO.BOARD)
@@ -13,6 +14,7 @@ class Motor:
         self.driverR = GPIO.PWM(pin2, 100)
 
     def forward(self,speed,s):
+        '''Move motor forward and aplly a cap'''
         self.driverR.stop()
         if speed>100:
             speed=100
@@ -20,6 +22,7 @@ class Motor:
         self.driverF.start(speed)
 
     def reverse(self,speed,s):
+        '''Move motor backward and aplly a cap'''
         self.driverF.stop()
         if speed>100:
             speed=100
@@ -27,6 +30,7 @@ class Motor:
         self.driverR.start(speed)
 
     def move(self,speed,s):
+        '''Move motor in direction based on the sign of speed'''
         speed=speed
         if abs(speed)<5:
             speed=0

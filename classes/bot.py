@@ -17,14 +17,18 @@ class Bot:
         self.speed = 0
         self.queue=queue
         self.offsetAngle = 0
+        # Initialize input pins for the IR sensors
         GPIO.setup(18,GPIO.IN)
         GPIO.setup(16,GPIO.IN)
 
     def move(self,speed,s):
+            '''Moves both motors with the same speed in the same direction'''
             self.motorL.move(speed,s)
             self.motorR.move(speed,s)
 
     def turn(self,speed,s):
+        '''Moves both motors in opposite directions to turn the robot.
+        Sign of the speed decides the direction of the turn'''
         self.speed=0
         if speed>0:
             self.motorL.move(speed,s)
@@ -35,6 +39,7 @@ class Bot:
             time.sleep(s)
 
     def balance(self):
+        '''Primitive balancing functions'''
         speed = 80
         while(True):
             #time.sleep(0.2)
@@ -63,15 +68,19 @@ class Bot:
             print 'y ', orientation[6],' speed ',speed
 
     def getPIDvalues(self):
-       try:
+        '''Gets the PID values from the main program for live testing of PIDs'''
+        try:
            return self.queue.get_nowait()
-       except Exception, e:
+        except Exception, e:
            return None
 
     def detectObstacle(self):
+        '''Reads the inputs from the IR sensors'''
         return {'front':GPIO.input(16),'back':GPIO.input(18)}
 
     def balance2(self):
+        '''Main function to balance the robot'''
+        #Initialize all variables
         KI=0
         KD=0
         KP=1
@@ -81,12 +90,13 @@ class Bot:
         gyroYangle=0
         CFangleY=0
         DT=0.02
+        #Open files for saving measured data for analysis
         f = open('point.txt', 'w')
         f1 = open('point1.txt', 'w')
-        print f
         i=0
         while True:
             i=i+1
+            #Get PID values from the main thread and set the constants and reset the zero angle
             PID = self.getPIDvalues()
             if PID is not None:
                 if PID['PID'] is not None:
@@ -97,13 +107,15 @@ class Bot:
                 elif PID['gyro'] is not None:
                     self.offsetAngle=CFangleY + self.offsetAngle
                     iTerm=0
-            orientation = self.imu.read_all()
-            gyroYangle+=(orientation[8]+18)*DT/5
-            accelAngle = orientation[6]*90
-            AA=0.9
+            #orientation = self.imu.read_all()
+            #gyroYangle+=(orientation[8]+18)*DT/5
+            #accelAngle = orientation[6]*90
+            #AA=0.9
             #CFangleY=AA*(CFangleY + gyroYangle) +(1 - AA) * accelAngle;
+            #Read the angle from the IMU
             CFangleY=self.imu.read_pitch_roll_yaw()[0]*180/3.14 - self.offsetAngle
             #Pterm = KP * 110*(1-1.05**(-abs(CFangleY)))*abs(CFangleY)/CFangleY
+            #Detect obstacles and accordingle add an offset to the speed
             obstacle = self.detectObstacle()
             if obstacle['front']:
                 oTerm=oTerm+1
@@ -111,6 +123,7 @@ class Bot:
                 oTerm=oTerm-1
             if obstacle['front']==0 and obstacle['back']==0:
                 oTerm=0
+            #Calculate the PID values from the constans and the angle
             Pterm = KP * CFangleY
             iTerm += KI * CFangleY*DT
             dTerm = KD *  (CFangleY -  lastAngle)
@@ -130,8 +143,10 @@ class Bot:
             self.move(adaptive_speed,0.01)
             print 'PID ',KP,KI,KD
             print 'Angle',gyroYangle,accelAngle,CFangleY,output,'   ',speed,adaptive_speed
+            #Write the data to the files
             f.write(str(i)+'\t'+str(CFangleY)+'\t'+str(gyroYangle)+'\t'+str(accelAngle)+'\n')
             f1.write(str(i)+'\t'+str(Pterm)+'\t'+str(iTerm)+'\t'+str(dTerm)+'\t'+str(output)+'\t'+str(adaptive_speed)+'\n')
+            #Ensures a 20ms time interval for every iteration for accurate angle reading
             while (time.time()-last_time<DT):
                 time.sleep(0.001)
             print time.time(),last_time,time.time()-last_time

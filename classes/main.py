@@ -33,10 +33,10 @@ p = multiprocessing.Process(target=worker, args=(refbot,))
 p.start()
 inkey = _Getch()
 i=0
-PID = {'PID':[1.0,0.0,0.0],'gyro':False}
+PID = {'PID':[0.0,0.0,0.0],'gyro':False}
 queue.put(PID)
 while True:
-    PID = {'PID':[1.0,0.0,0.0],'gyro':False}
+    PID = {'PID':[0.0,0.0,0.0],'gyro':False}
     PID['PID'][0]=raw_input()
     if PID['PID'][0]=='':
         PID['PID']=None
